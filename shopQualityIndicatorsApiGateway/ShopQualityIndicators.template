@@ -1,0 +1,124 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "StageType": {
+      "Description": "Stage type.",
+      "Type": "String",
+      "AllowedValues": [
+        "prod",
+        "qa",
+        "integr",
+        "dev"
+      ],
+      "ConstraintDescription": "must specify prod, qa, integr or dev."
+    }
+  },
+  "Mappings": {
+    "StageMap": {
+      "prod": {
+        "TargerUri": "https://api.trustedshops.com/rest/public/v2/shops/{tsId}/quality"
+      },
+      "qa": {
+        "TargerUri": "https://api-qa.trustedshops.com/rest/public/v2/shops/{tsId}/quality"
+      },
+      "integr": {
+        "TargerUri": "https://api-qa.trustedshops.com/rest/public/v2/shops/{tsId}/quality"
+      },
+      "dev": {
+        "TargerUri": "https://api-qa.trustedshops.com/rest/public/v2/shops/{tsId}/quality"
+      }
+    }
+  },
+  "Resources": {
+    "ShopQualityIndicatorsApi": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "ShopQualityIndicatorsApi"
+      }
+    },
+    "V3": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopQualityIndicatorsApi"
+        },
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ShopQualityIndicatorsApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "v3"
+      }
+    },
+    "Indicators": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopQualityIndicatorsApi"
+        },
+        "ParentId": {
+          "Ref": "V3"
+        },
+        "PathPart": "indiocators"
+      }
+    },
+    "GetIndicatorsByTsId": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopQualityIndicatorsApi"
+        },
+        "ResourceId": {
+          "Ref": "Indicators"
+        },
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "MethodResponses": [
+          {
+            "StatusCode": 200
+          },
+          {
+            "StatusCode": 400
+          },
+          {
+            "StatusCode": 404
+          }
+        ],
+        "RequestParameters": {
+          "method.request.querystring.tsId": true
+        },
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "StatusCode": 200,
+              "SelectionPattern": 200
+            },
+            {
+              "StatusCode": 400,
+              "SelectionPattern": 400
+            },
+            {
+              "StatusCode": 404,
+              "SelectionPattern": 404
+            }
+          ],
+          "RequestParameters": {
+            "integration.request.path.tsId": "method.request.querystring.tsId"
+          },
+          "Type": "HTTP",
+          "Uri": {
+            "Fn::FindInMap": [
+              "StageMap",
+              {
+                "Ref": "StageType"
+              },
+              "TargerUri"
+            ]
+          },
+          "IntegrationHttpMethod": "GET"
+        }
+      }
+    }
+  }
+}

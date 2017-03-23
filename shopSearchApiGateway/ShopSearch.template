@@ -1,0 +1,201 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "StageType": {
+      "Description": "Stage type.",
+      "Type": "String",
+      "AllowedValues": [
+        "prod",
+        "qa",
+        "integr",
+        "dev"
+      ],
+      "ConstraintDescription": "must specify prod, qa, integr or dev."
+    }
+  },
+  "Mappings": {
+    "StageMap": {
+      "prod": {
+        "TargerUri": "https://api.trustedshops.com/rest/public/v2/shops"
+      },
+      "qa": {
+        "TargerUri": "https://api-qa.trustedshops.com/rest/public/v2/shops"
+      },
+      "integr": {
+        "TargerUri": "https://api-qa.trustedshops.com/rest/public/v2/shops"
+      },
+      "dev": {
+        "TargerUri": "https://api-qa.trustedshops.com/rest/public/v2/shops"
+      }
+    }
+  },
+  "Resources": {
+    "ShopSearchApi": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "ShopSearchApi"
+      }
+    },
+    "V3": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopSearchApi"
+        },
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ShopSearchApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "v3"
+      }
+    },
+    "TsId": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopSearchApi"
+        },
+        "ParentId": {
+          "Ref": "Shops"
+        },
+        "PathPart": "{tsId}"
+      }
+    },
+    "Shops": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopSearchApi"
+        },
+        "ParentId": {
+          "Ref": "V3"
+        },
+        "PathPart": "shops"
+      }
+    },
+    "SearchShopsByUrl": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopSearchApi"
+        },
+        "ResourceId": {
+          "Ref": "Shops"
+        },
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "MethodResponses": [
+          {
+            "StatusCode": 200
+          },
+          {
+            "StatusCode": 400
+          },
+          {
+            "StatusCode": 404
+          }
+        ],
+        "RequestParameters": {
+          "method.request.querystring.url": true
+        },
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "StatusCode": 200,
+              "SelectionPattern": 200
+            },
+            {
+              "StatusCode": 400,
+              "SelectionPattern": 400
+            },
+            {
+              "StatusCode": 404,
+              "SelectionPattern": 404
+            }
+          ],
+          "RequestParameters": {
+            "integration.request.querystring.url": "method.request.querystring.url"
+          },
+          "Type": "HTTP",
+          "Uri": {
+            "Fn::FindInMap": [
+              "StageMap",
+              {
+                "Ref": "StageType"
+              },
+              "TargerUri"
+            ]
+          },
+          "IntegrationHttpMethod": "GET"
+        }
+      }
+    },
+    "SearchShopsByTsId": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "ShopSearchApi"
+        },
+        "ResourceId": {
+          "Ref": "TsId"
+        },
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "MethodResponses": [
+          {
+            "StatusCode": 200
+          },
+          {
+            "StatusCode": 400
+          },
+          {
+            "StatusCode": 404
+          }
+        ],
+        "RequestParameters": {
+          "method.request.path.tsId": true
+        },
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "StatusCode": 200,
+              "SelectionPattern": 200
+            },
+            {
+              "StatusCode": 400,
+              "SelectionPattern": 400
+            },
+            {
+              "StatusCode": 404,
+              "SelectionPattern": 404
+            }
+          ],
+          "RequestParameters": {
+            "integration.request.path.tsId": "method.request.path.tsId"
+          },
+          "Type": "HTTP",
+          "Uri": {
+            "Fn::Join": [
+              "/",
+              [
+                {
+                  "Fn::FindInMap": [
+                    "StageMap",
+                    {
+                      "Ref": "StageType"
+                    },
+                    "TargerUri"
+                  ]
+                },
+                "{tsId}"
+              ]
+            ]
+          },
+          "IntegrationHttpMethod": "GET"
+        }
+      }
+    }
+  }
+}
