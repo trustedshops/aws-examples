@@ -132,7 +132,49 @@
           "Ref": "Sqs"
         },
         "HttpMethod": "POST",
-        "AuthorizationType": "NONE"
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "StatusCode": 200
+            }
+          ],
+          "RequestParameters": {
+            "integration.request.querystring.Message": "method.request.body",
+            "integration.request.querystring.QueueArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "'",
+                  {
+                    "Ref": "QueueGatewayQueue"
+                  },
+                  "'"
+                ]
+              ]
+            }
+          },
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":sqs:action/Publish"
+              ]
+            ]
+          },
+          "Type": "AWS",
+          "IntegrationHttpMethod": "POST",
+          "Credentials": {
+            "Fn::GetAtt": [
+              "QueueGatewayRestApiRole",
+              "Arn"
+            ]
+          }
+        }
       },
       "Metadata": {
         "AWS::CloudFormation::Designer": {
@@ -178,6 +220,42 @@
         "AWS::CloudFormation::Designer": {
           "id": "a3e2998e-d1a5-4596-aac5-69d48384bdbe"
         }
+      }
+    },
+    "QueueGatewayRestApiRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Path": "/",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              },
+              "Effect": "Allow",
+              "Sid": ""
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "QueueGatewayRestApiPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "sns:*",
+                  "Resource": [
+                    "*"
+                  ],
+                  "Effect": "Allow"
+                }
+              ]
+            }
+          }
+        ]
       }
     }
   }

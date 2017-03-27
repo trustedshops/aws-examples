@@ -19,7 +19,7 @@ CMD=$1
 TEMPLATE_URL=$2
 STAGE=${3:-dev}
 TEMPLATE=$(local_path ${TEMPLATE_URL})
-STACK_NAME=TestEventStack
+STACK_NAME=TestApiGatewayToTopicStack
 TEMPLATE_NAME=ApiGatewayToTopic
 
 echo "template: $TEMPLATE"
