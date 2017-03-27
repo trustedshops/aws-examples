@@ -133,6 +133,11 @@
         },
         "HttpMethod": "POST",
         "AuthorizationType": "NONE",
+        "MethodResponses": [
+          {
+            "StatusCode": 200
+          }
+        ],
         "Integration": {
           "IntegrationResponses": [
             {
@@ -141,7 +146,7 @@
           ],
           "RequestParameters": {
             "integration.request.querystring.Version": "'2012-11-05'",
-            "integration.request.querystring.Message": "method.request.body",
+            "integration.request.querystring.MessageBody": "method.request.body",
             "integration.request.querystring.QueueUrl": { "Fn::Sub" : "'${QueueGatewayQueue}'" }
           },
           "Uri": {
@@ -236,7 +241,7 @@
               "Version": "2012-10-17",
               "Statement": [
                 {
-                  "Action": "sns:*",
+                  "Action": "sqs:*",
                   "Resource": [
                     "*"
                   ],
