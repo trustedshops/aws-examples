@@ -140,6 +140,7 @@
             }
           ],
           "RequestParameters": {
+            "integration.request.querystring.Version": "'2012-11-05'",
             "integration.request.querystring.Message": "method.request.body",
             "integration.request.querystring.QueueArn": {
               "Fn::Join": [
