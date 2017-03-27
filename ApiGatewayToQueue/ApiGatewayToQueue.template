@@ -142,18 +142,7 @@
           "RequestParameters": {
             "integration.request.querystring.Version": "'2012-11-05'",
             "integration.request.querystring.Message": "method.request.body",
-            "integration.request.querystring.QueueArn": {
-              "Fn::Join": [
-                "",
-                [
-                  "'",
-                  {
-                    "Ref": "QueueGatewayQueue"
-                  },
-                  "'"
-                ]
-              ]
-            }
+            "integration.request.querystring.QueueUrl": { "Fn::Sub" : "'${QueueGatewayQueue}'" }
           },
           "Uri": {
             "Fn::Join": [
@@ -163,7 +152,7 @@
                 {
                   "Ref": "AWS::Region"
                 },
-                ":sqs:action/Publish"
+                ":sqs:action/SendMessage"
               ]
             ]
           },
