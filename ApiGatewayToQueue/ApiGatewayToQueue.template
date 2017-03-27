@@ -8,13 +8,13 @@
           "height": 240
         },
         "position": {
-          "x": -100,
-          "y": -10
+          "x": 90,
+          "y": 0
         },
         "z": 1,
         "embeds": [
-          "1c7834bb-95fd-464a-9eec-f84c69621cc1",
-          "8250083e-bf3d-4b93-aea9-a9c49b0db33f"
+          "8250083e-bf3d-4b93-aea9-a9c49b0db33f",
+          "1c7834bb-95fd-464a-9eec-f84c69621cc1"
         ]
       },
       "8250083e-bf3d-4b93-aea9-a9c49b0db33f": {
@@ -23,8 +23,8 @@
           "height": 150
         },
         "position": {
-          "x": -10,
-          "y": 50
+          "x": 180,
+          "y": 60
         },
         "z": 2,
         "parent": "ee40792a-a182-4dec-b488-95e4a460c6b6",
@@ -39,12 +39,54 @@
           "height": 60
         },
         "position": {
-          "x": 200,
-          "y": 50
+          "x": 390,
+          "y": 60
         },
         "z": 2,
         "parent": "ee40792a-a182-4dec-b488-95e4a460c6b6",
         "embeds": []
+      },
+      "e1e9d718-3ac6-4a43-9b7c-e9d89370ba14": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 220,
+          "y": 280
+        },
+        "z": 1,
+        "embeds": [],
+        "dependson": [
+          "ee40792a-a182-4dec-b488-95e4a460c6b6"
+        ]
+      },
+      "a3e2998e-d1a5-4596-aac5-69d48384bdbe": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 270
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "e1e9d718-3ac6-4a43-9b7c-e9d89370ba14"
+        ],
+        "isrelatedto": [
+          "ee40792a-a182-4dec-b488-95e4a460c6b6"
+        ]
+      },
+      "dd03dc4d-28fe-4ad2-a2c7-d617761108d5": {
+        "source": {
+          "id": "e1e9d718-3ac6-4a43-9b7c-e9d89370ba14"
+        },
+        "target": {
+          "id": "ee40792a-a182-4dec-b488-95e4a460c6b6"
+        },
+        "z": 11
       }
     }
   },
@@ -90,12 +132,51 @@
           "Ref": "Sqs"
         },
         "HttpMethod": "POST",
-        "AuthorizationType": "NONE",
-
+        "AuthorizationType": "NONE"
       },
       "Metadata": {
         "AWS::CloudFormation::Designer": {
           "id": "1c7834bb-95fd-464a-9eec-f84c69621cc1"
+        }
+      }
+    },
+    "QueueGatewayQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "e1e9d718-3ac6-4a43-9b7c-e9d89370ba14"
+        }
+      },
+      "DependsOn": [
+        "QueueGatewayRestApi"
+      ]
+    },
+    "QueueGatewayQueuePolicy": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "Queues": [
+          {
+            "Ref": "QueueGatewayQueue"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Id": "sqspolicy",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": "SQS:SendMessage",
+              "Resource": { "Ref": "QueueGatewayQueue" }
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a3e2998e-d1a5-4596-aac5-69d48384bdbe"
         }
       }
     }
