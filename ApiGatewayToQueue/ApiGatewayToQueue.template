@@ -1,0 +1,103 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "ee40792a-a182-4dec-b488-95e4a460c6b6": {
+        "size": {
+          "width": 420,
+          "height": 240
+        },
+        "position": {
+          "x": -100,
+          "y": -10
+        },
+        "z": 1,
+        "embeds": [
+          "1c7834bb-95fd-464a-9eec-f84c69621cc1",
+          "8250083e-bf3d-4b93-aea9-a9c49b0db33f"
+        ]
+      },
+      "8250083e-bf3d-4b93-aea9-a9c49b0db33f": {
+        "size": {
+          "width": 150,
+          "height": 150
+        },
+        "position": {
+          "x": -10,
+          "y": 50
+        },
+        "z": 2,
+        "parent": "ee40792a-a182-4dec-b488-95e4a460c6b6",
+        "embeds": [],
+        "isassociatedwith": [
+          "ee40792a-a182-4dec-b488-95e4a460c6b6"
+        ]
+      },
+      "1c7834bb-95fd-464a-9eec-f84c69621cc1": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 200,
+          "y": 50
+        },
+        "z": 2,
+        "parent": "ee40792a-a182-4dec-b488-95e4a460c6b6",
+        "embeds": []
+      }
+    }
+  },
+  "Resources": {
+    "QueueGatewayRestApi": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "QueueGatewayRestApi"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "ee40792a-a182-4dec-b488-95e4a460c6b6"
+        }
+      }
+    },
+    "Sqs": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "QueueGatewayRestApi"
+        },
+        "PathPart": "sqs",
+        "ParentId": {
+          "Fn::GetAtt": [
+            "QueueGatewayRestApi",
+            "RootResourceId"
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "8250083e-bf3d-4b93-aea9-a9c49b0db33f"
+        }
+      }
+    },
+    "POST": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "QueueGatewayRestApi"
+        },
+        "ResourceId": {
+          "Ref": "Sqs"
+        },
+        "HttpMethod": "POST",
+        "AuthorizationType": "NONE",
+
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "1c7834bb-95fd-464a-9eec-f84c69621cc1"
+        }
+      }
+    }
+  }
+}

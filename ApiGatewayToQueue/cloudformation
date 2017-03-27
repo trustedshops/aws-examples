@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -e
+
+function help {
+  echo "USAGE: ${0} backup|save|apply S3-Template-URL"
+  exit 1
+}
+
+if [[ $# < 2 ]]
+then
+  help
+fi
+
+function local_path {
+   echo $1 | cut -d/ -f4-
+}
+
+CMD=$1
+TEMPLATE_URL=$2
+STAGE=${3:-dev}
+TEMPLATE=$(local_path ${TEMPLATE_URL})
+STACK_NAME=TestApiGatewayToQueueStack
+TEMPLATE_NAME=ApiGatewayToQueue
+
+echo "template: $TEMPLATE"
+
+if [ -z "$TEMPLATE" ]
+then
+  echo "ERROR: invalid url: $TEMPLATE_URL"
+  exit 2
+fi
+
+case "$CMD" in
+  apply)
+    aws cloudformation update-stack --capabilities=CAPABILITY_IAM --stack-name=$STACK_NAME --template-url=$TEMPLATE_URL
+    ;;
+  backup)
+    ts=$(date +%s)
+    aws s3 cp s3://$TEMPLATE "$TEMPLATE_NAME.template.BAK.$ts"
+    ;;
+  save)
+    aws s3 cp s3://$TEMPLATE $TEMPLATE_NAME.template
+    ;;
+  *)
+    help
+esac
