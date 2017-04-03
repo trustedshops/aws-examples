@@ -5,27 +5,22 @@
       "Type": "AWS::ApiGateway::Resource",
       "Properties": {
         "RestApiId": {
-          "Ref": "TestEventRestApi"
+          "Ref": "TopicGatewayRestApi"
         },
         "ParentId": {
           "Fn::GetAtt": [
-            "TestEventRestApi",
+            "TopicGatewayRestApi",
             "RootResourceId"
           ]
         },
         "PathPart": "sns"
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "311ca117-5cbb-449f-9c19-8df27f245a94"
-        }
       }
     },
     "POST": {
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
         "RestApiId": {
-          "Ref": "TestEventRestApi"
+          "Ref": "TopicGatewayRestApi"
         },
         "ResourceId": {
           "Ref": "Sns"
@@ -51,7 +46,7 @@
                 [
                   "'",
                   {
-                    "Ref": "TestEventTopic"
+                    "Ref": "TopicGatewayTopic"
                   },
                   "'"
                 ]
@@ -78,11 +73,6 @@
               "Arn"
             ]
           }
-        }
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "4325a432-a5ef-4434-85e4-08b360f4627e"
         }
       }
     },
@@ -120,225 +110,27 @@
             }
           }
         ]
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "9005751a-d44b-43d9-b637-ae19ec3f8abf"
-        }
       }
     },
-    "TestEventRestApi": {
+    "TopicGatewayRestApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
-        "Name": "TestEventRestApi"
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "4670f42f-fb25-4be2-a5c2-4ae2f05a173e"
-        }
+        "Name": "TopicGatewayRestApi"
       },
       "DependsOn": [
         "TestEventApiRole",
-        "TestEventTopic",
-        "TestEventTopic",
+        "TopicGatewayTopic",
         "TestEventApiRole"
       ]
     },
-    "TestEventTopic": {
+    "TopicGatewayTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
-        "TopicName": "TestEventTopic",
+        "TopicName": "TopicGatewayTopic",
         "Subscription": []
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "ac206541-efd0-4d74-913d-1e85cb3fca81"
-        }
       }
     }
   },
   "Description": "",
-  "Metadata": {
-    "AWS::CloudFormation::Designer": {
-      "4670f42f-fb25-4be2-a5c2-4ae2f05a173e": {
-        "size": {
-          "width": 390,
-          "height": 270
-        },
-        "position": {
-          "x": -840,
-          "y": -60
-        },
-        "z": 1,
-        "embeds": [
-          "311ca117-5cbb-449f-9c19-8df27f245a94",
-          "9ed2334f-1621-4773-a356-3ae2731fe3bb",
-          "066e7acc-673f-4fd2-bba3-4912ab111075",
-          "4325a432-a5ef-4434-85e4-08b360f4627e"
-        ],
-        "dependson": [
-          "ac206541-efd0-4d74-913d-1e85cb3fca81",
-          "9005751a-d44b-43d9-b637-ae19ec3f8abf"
-        ]
-      },
-      "311ca117-5cbb-449f-9c19-8df27f245a94": {
-        "size": {
-          "width": 90,
-          "height": 90
-        },
-        "position": {
-          "x": -780,
-          "y": -30
-        },
-        "z": 2,
-        "parent": "4670f42f-fb25-4be2-a5c2-4ae2f05a173e",
-        "embeds": [],
-        "isassociatedwith": [
-          "4670f42f-fb25-4be2-a5c2-4ae2f05a173e"
-        ]
-      },
-      "9ed2334f-1621-4773-a356-3ae2731fe3bb": {
-        "size": {
-          "width": 90,
-          "height": 90
-        },
-        "position": {
-          "x": -670,
-          "y": -30
-        },
-        "z": 2,
-        "parent": "4670f42f-fb25-4be2-a5c2-4ae2f05a173e",
-        "embeds": [],
-        "isassociatedwith": [
-          "311ca117-5cbb-449f-9c19-8df27f245a94"
-        ]
-      },
-      "066e7acc-673f-4fd2-bba3-4912ab111075": {
-        "size": {
-          "width": 90,
-          "height": 90
-        },
-        "position": {
-          "x": -560,
-          "y": -30
-        },
-        "z": 2,
-        "parent": "4670f42f-fb25-4be2-a5c2-4ae2f05a173e",
-        "embeds": [],
-        "isassociatedwith": [
-          "9ed2334f-1621-4773-a356-3ae2731fe3bb"
-        ]
-      },
-      "4325a432-a5ef-4434-85e4-08b360f4627e": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -650,
-          "y": 110
-        },
-        "z": 2,
-        "parent": "4670f42f-fb25-4be2-a5c2-4ae2f05a173e",
-        "embeds": [],
-        "isrelatedto": [
-          "ac206541-efd0-4d74-913d-1e85cb3fca81",
-          "9005751a-d44b-43d9-b637-ae19ec3f8abf"
-        ]
-      },
-      "ac206541-efd0-4d74-913d-1e85cb3fca81": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -370,
-          "y": -30
-        },
-        "z": 0,
-        "embeds": [],
-        "isrelatedto": [
-          "2cf88cfa-ea7d-4d13-b287-86c66f31a7a4"
-        ]
-      },
-      "5a1f1902-48ad-49ac-be22-56399857b1b3": {
-        "source": {
-          "id": "e315cad3-5eb5-4a33-bd8a-4594299d9bf9"
-        },
-        "target": {
-          "id": "6dff7f5d-2080-4c55-a650-0ebf5228bc61"
-        },
-        "z": 11
-      },
-      "7827744c-9f2e-465e-a078-0eaa5c45b4a3": {
-        "source": {
-          "id": "6dff7f5d-2080-4c55-a650-0ebf5228bc61"
-        },
-        "target": {
-          "id": "2cf88cfa-ea7d-4d13-b287-86c66f31a7a4"
-        },
-        "z": 12
-      },
-      "3cb76a89-a76d-41ac-9ebc-e73a7498c1b4": {
-        "source": {
-          "id": "4670f42f-fb25-4be2-a5c2-4ae2f05a173e"
-        },
-        "target": {
-          "id": "ac206541-efd0-4d74-913d-1e85cb3fca81"
-        },
-        "z": 13
-      },
-      "9005751a-d44b-43d9-b637-ae19ec3f8abf": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -1020,
-          "y": -10
-        },
-        "z": 0,
-        "embeds": []
-      },
-      "44fb56cf-ab09-469e-b07c-94b391e7c77a": {
-        "source": {
-          "id": "34dd514b-24b7-44b8-85cc-e368ed2f364d"
-        },
-        "target": {
-          "id": "9005751a-d44b-43d9-b637-ae19ec3f8abf"
-        },
-        "z": 11
-      },
-      "b9d02928-b6b6-40c2-9433-3af2514e3a73": {
-        "source": {
-          "id": "4670f42f-fb25-4be2-a5c2-4ae2f05a173e"
-        },
-        "target": {
-          "id": "9005751a-d44b-43d9-b637-ae19ec3f8abf"
-        },
-        "z": 12
-      },
-      "1090a2ba-8012-4138-bbf3-720401a40cf4": {
-        "source": {
-          "id": "0b04ec30-d578-4bbf-acd0-1ea16ca462c8"
-        },
-        "target": {
-          "id": "2cf88cfa-ea7d-4d13-b287-86c66f31a7a4"
-        },
-        "z": 11
-      },
-      "4e008266-654b-4d3a-9cd2-2a452e2e7a16": {
-        "source": {
-          "id": "0b04ec30-d578-4bbf-acd0-1ea16ca462c8",
-          "selector": "g:nth-child(1) g:nth-child(5) g:nth-child(1) circle:nth-child(1)     ",
-          "port": "AWS::DependencyLink-*"
-        },
-        "target": {
-          "id": "2cf88cfa-ea7d-4d13-b287-86c66f31a7a4"
-        },
-        "z": 12
-      }
-    }
-  },
   "Parameters": {}
 }
