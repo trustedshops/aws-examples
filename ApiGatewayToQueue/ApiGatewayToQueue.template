@@ -1,152 +1,89 @@
-{
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Resources": {
-    "QueueGatewayRestApi": {
-      "Type": "AWS::ApiGateway::RestApi",
-      "Properties": {
-        "Name": "QueueGatewayRestApi"
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "ee40792a-a182-4dec-b488-95e4a460c6b6"
-        }
-      }
-    },
-    "Sqs": {
-      "Type": "AWS::ApiGateway::Resource",
-      "Properties": {
-        "RestApiId": {
-          "Ref": "QueueGatewayRestApi"
-        },
-        "PathPart": "sqs",
-        "ParentId": {
-          "Fn::GetAtt": [
-            "QueueGatewayRestApi",
-            "RootResourceId"
-          ]
-        }
-      }
-    },
-    "POST": {
-      "Type": "AWS::ApiGateway::Method",
-      "Properties": {
-        "RestApiId": {
-          "Ref": "QueueGatewayRestApi"
-        },
-        "ResourceId": {
-          "Ref": "Sqs"
-        },
-        "HttpMethod": "POST",
-        "AuthorizationType": "NONE",
-        "MethodResponses": [
-          {
-            "StatusCode": 200
-          }
-        ],
-        "Integration": {
-          "IntegrationResponses": [
-            {
-              "StatusCode": 200
-            }
-          ],
-          "RequestParameters": {
-            "integration.request.querystring.Version": "'2012-11-05'",
-            "integration.request.querystring.MessageBody": "method.request.body",
-            "integration.request.querystring.QueueUrl": { "Fn::Sub" : "'${QueueGatewayQueue}'" }
-          },
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":sqs:action/SendMessage"
-              ]
-            ]
-          },
-          "Type": "AWS",
-          "IntegrationHttpMethod": "POST",
-          "Credentials": {
-            "Fn::GetAtt": [
-              "QueueGatewayRestApiRole",
-              "Arn"
-            ]
-          }
-        }
-      }
-    },
-    "QueueGatewayQueue": {
-      "Type": "AWS::SQS::Queue",
-      "Properties": {},
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "e1e9d718-3ac6-4a43-9b7c-e9d89370ba14"
-        }
-      },
-      "DependsOn": [
-        "QueueGatewayRestApi"
-      ]
-    },
-    "QueueGatewayQueuePolicy": {
-      "Type": "AWS::SQS::QueuePolicy",
-      "Properties": {
-        "Queues": [
-          {
-            "Ref": "QueueGatewayQueue"
-          }
-        ],
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Id": "sqspolicy",
-          "Statement": [
-            {
-              "Sid": "",
-              "Effect": "Allow",
-              "Principal": "*",
-              "Action": "SQS:SendMessage",
-              "Resource": { "Ref": "QueueGatewayQueue" }
-            }
-          ]
-        }
-      }
-    },
-    "QueueGatewayRestApiRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "Path": "/",
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com"
-              },
-              "Effect": "Allow",
-              "Sid": ""
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyName": "QueueGatewayRestApiPolicy",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "sqs:*",
-                  "Resource": [
-                    "*"
-                  ],
-                  "Effect": "Allow"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  }
-}
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  QueueGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: QueueGatewayRestApi
+  Sqs:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: QueueGatewayRestApi
+      PathPart: sqs
+      ParentId:
+        Fn::GetAtt:
+        - QueueGatewayRestApi
+        - RootResourceId
+  POST:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: QueueGatewayRestApi
+      ResourceId:
+        Ref: Sqs
+      HttpMethod: POST
+      AuthorizationType: NONE
+      MethodResponses:
+      - StatusCode: 200
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+        RequestParameters:
+          integration.request.querystring.Version: "'2012-11-05'"
+          integration.request.querystring.MessageBody: method.request.body
+          integration.request.querystring.QueueUrl:
+            Fn::Sub: "'${QueueGatewayQueue}'"
+        Uri:
+          Fn::Join:
+          - ''
+          - - 'arn:aws:apigateway:'
+            - Ref: AWS::Region
+            - ":sqs:action/SendMessage"
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Credentials:
+          Fn::GetAtt:
+          - QueueGatewayRestApiRole
+          - Arn
+  QueueGatewayQueue:
+    Type: AWS::SQS::Queue
+    Properties: {}
+    DependsOn:
+    - QueueGatewayRestApi
+  QueueGatewayQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+      - Ref: QueueGatewayQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: sqspolicy
+        Statement:
+        - Sid: ''
+          Effect: Allow
+          Principal: "*"
+          Action: SQS:SendMessage
+          Resource:
+            Ref: QueueGatewayQueue
+  QueueGatewayRestApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Principal:
+            Service: apigateway.amazonaws.com
+          Effect: Allow
+          Sid: ''
+      Policies:
+      - PolicyName: QueueGatewayRestApiPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sqs:*
+            Resource:
+            - "*"
+            Effect: Allow

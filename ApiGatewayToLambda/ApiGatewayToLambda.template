@@ -1,0 +1,110 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  QueueGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: LambdaGatewayRestApi
+  HelloResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: QueueGatewayRestApi
+      ParentId:
+        Fn::GetAtt:
+        - QueueGatewayRestApi
+        - RootResourceId
+      PathPart: hello
+  GreetingRequest:
+    DependsOn: LambdaPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: GET
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri:
+          Fn::Join:
+          - ''
+          - - 'arn:aws:apigateway:'
+            - Ref: AWS::Region
+            - ":lambda:path/2015-03-31/functions/"
+            - Fn::GetAtt:
+              - GreetingLambda
+              - Arn
+            - "/invocations"
+        IntegrationResponses:
+        - StatusCode: 200
+        RequestTemplates:
+          application/json:
+            Fn::Join:
+            - ''
+            - - "{"
+              - '  "name": "$input.params(''name'')"'
+              - "}"
+      RequestParameters:
+        method.request.querystring.name: false
+      ResourceId:
+        Ref: HelloResource
+      RestApiId:
+        Ref: QueueGatewayRestApi
+      MethodResponses:
+      - StatusCode: 200
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - GreetingLambda
+        - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:execute-api:'
+          - Ref: AWS::Region
+          - ":"
+          - Ref: AWS::AccountId
+          - ":"
+          - Ref: QueueGatewayRestApi
+          - "/*"
+  GreetingLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile:
+          Fn::Join:
+          - "\n"
+          - - "'use strict';"
+            - ''
+            - "// Greeter Lambda"
+            - exports.handler = (event, context, callback) => {
+            - "  console.log('Event:', JSON.stringify(event));"
+            - "  const name = event.name || 'World';"
+            - "  const response = {greeting: `Hello, ${name}!`};"
+            - "  callback(null, response);"
+            - "};"
+      Description: A greeting function
+      FunctionName: GreetingLambda
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Runtime: nodejs4.3
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole

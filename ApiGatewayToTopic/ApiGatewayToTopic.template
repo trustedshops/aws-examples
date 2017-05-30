@@ -1,136 +1,83 @@
-{
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Resources": {
-    "Sns": {
-      "Type": "AWS::ApiGateway::Resource",
-      "Properties": {
-        "RestApiId": {
-          "Ref": "TopicGatewayRestApi"
-        },
-        "ParentId": {
-          "Fn::GetAtt": [
-            "TopicGatewayRestApi",
-            "RootResourceId"
-          ]
-        },
-        "PathPart": "sns"
-      }
-    },
-    "POST": {
-      "Type": "AWS::ApiGateway::Method",
-      "Properties": {
-        "RestApiId": {
-          "Ref": "TopicGatewayRestApi"
-        },
-        "ResourceId": {
-          "Ref": "Sns"
-        },
-        "AuthorizationType": "NONE",
-        "HttpMethod": "POST",
-        "MethodResponses": [
-          {
-            "StatusCode": 200
-          }
-        ],
-        "Integration": {
-          "IntegrationResponses": [
-            {
-              "StatusCode": 200
-            }
-          ],
-          "RequestParameters": {
-            "integration.request.querystring.Message": "method.request.body",
-            "integration.request.querystring.TopicArn": {
-              "Fn::Join": [
-                "",
-                [
-                  "'",
-                  {
-                    "Ref": "TopicGatewayTopic"
-                  },
-                  "'"
-                ]
-              ]
-            }
-          },
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":sns:action/Publish"
-              ]
-            ]
-          },
-          "Type": "AWS",
-          "IntegrationHttpMethod": "POST",
-          "Credentials": {
-            "Fn::GetAtt": [
-              "TestEventApiRole",
-              "Arn"
-            ]
-          }
-        }
-      }
-    },
-    "TestEventApiRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "Path": "/",
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com"
-              },
-              "Effect": "Allow",
-              "Sid": ""
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyName": "TestEventApiPolicy",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "sns:*",
-                  "Resource": [
-                    "*"
-                  ],
-                  "Effect": "Allow"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "TopicGatewayRestApi": {
-      "Type": "AWS::ApiGateway::RestApi",
-      "Properties": {
-        "Name": "TopicGatewayRestApi"
-      },
-      "DependsOn": [
-        "TestEventApiRole",
-        "TopicGatewayTopic",
-        "TestEventApiRole"
-      ]
-    },
-    "TopicGatewayTopic": {
-      "Type": "AWS::SNS::Topic",
-      "Properties": {
-        "TopicName": "TopicGatewayTopic",
-        "Subscription": []
-      }
-    }
-  },
-  "Description": "",
-  "Parameters": {}
-}
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  Sns:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: TopicGatewayRestApi
+      ParentId:
+        Fn::GetAtt:
+        - TopicGatewayRestApi
+        - RootResourceId
+      PathPart: sns
+  POST:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: TopicGatewayRestApi
+      ResourceId:
+        Ref: Sns
+      AuthorizationType: NONE
+      HttpMethod: POST
+      MethodResponses:
+      - StatusCode: 200
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+        RequestParameters:
+          integration.request.querystring.Message: method.request.body
+          integration.request.querystring.TopicArn:
+            Fn::Join:
+            - ''
+            - - "'"
+              - Ref: TopicGatewayTopic
+              - "'"
+        Uri:
+          Fn::Join:
+          - ''
+          - - 'arn:aws:apigateway:'
+            - Ref: AWS::Region
+            - ":sns:action/Publish"
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Credentials:
+          Fn::GetAtt:
+          - TestEventApiRole
+          - Arn
+  TestEventApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Principal:
+            Service: apigateway.amazonaws.com
+          Effect: Allow
+          Sid: ''
+      Policies:
+      - PolicyName: TestEventApiPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sns:*
+            Resource:
+            - "*"
+            Effect: Allow
+  TopicGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: TopicGatewayRestApi
+    DependsOn:
+    - TestEventApiRole
+    - TopicGatewayTopic
+    - TestEventApiRole
+  TopicGatewayTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: TopicGatewayTopic
+      Subscription: []
+Description: ''
+Parameters: {}
