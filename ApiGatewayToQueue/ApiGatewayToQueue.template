@@ -1,25 +1,25 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
-  QueueGatewayRestApi:
+  archExampleApiGatewayToQueueRestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: QueueGatewayRestApi
+      Name: archExampleApiGatewayToQueueRestApi
   Sqs:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId:
-        Ref: QueueGatewayRestApi
+        Ref: archExampleApiGatewayToQueueRestApi
       PathPart: sqs
       ParentId:
         Fn::GetAtt:
-        - QueueGatewayRestApi
+        - archExampleApiGatewayToQueueRestApi
         - RootResourceId
   POST:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId:
-        Ref: QueueGatewayRestApi
+        Ref: archExampleApiGatewayToQueueRestApi
       ResourceId:
         Ref: Sqs
       HttpMethod: POST
@@ -33,7 +33,7 @@ Resources:
           integration.request.querystring.Version: "'2012-11-05'"
           integration.request.querystring.MessageBody: method.request.body
           integration.request.querystring.QueueUrl:
-            Fn::Sub: "'${QueueGatewayQueue}'"
+            Fn::Sub: "'${archExampleApiGatewayToQueueQueue}'"
         Uri:
           Fn::Join:
           - ''
@@ -44,18 +44,18 @@ Resources:
         IntegrationHttpMethod: POST
         Credentials:
           Fn::GetAtt:
-          - QueueGatewayRestApiRole
+          - archExampleApiGatewayToQueueRestApiRole
           - Arn
-  QueueGatewayQueue:
+  archExampleApiGatewayToQueueQueue:
     Type: AWS::SQS::Queue
     Properties: {}
     DependsOn:
-    - QueueGatewayRestApi
-  QueueGatewayQueuePolicy:
+    - archExampleApiGatewayToQueueRestApi
+  archExampleApiGatewayToQueueQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
       Queues:
-      - Ref: QueueGatewayQueue
+      - Ref: archExampleApiGatewayToQueueQueue
       PolicyDocument:
         Version: '2012-10-17'
         Id: sqspolicy
@@ -65,8 +65,8 @@ Resources:
           Principal: "*"
           Action: SQS:SendMessage
           Resource:
-            Ref: QueueGatewayQueue
-  QueueGatewayRestApiRole:
+            Ref: archExampleApiGatewayToQueueQueue
+  archExampleApiGatewayToQueueRestApiRole:
     Type: AWS::IAM::Role
     Properties:
       Path: "/"
@@ -79,7 +79,7 @@ Resources:
           Effect: Allow
           Sid: ''
       Policies:
-      - PolicyName: QueueGatewayRestApiPolicy
+      - PolicyName: archExampleApiGatewayToQueueRestApiPolicy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:

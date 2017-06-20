@@ -1,21 +1,29 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
+  archExampleApiGatewayToTopicApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: archExampleApiGatewayToTopicApi
+    DependsOn:
+    - archExampleApiGatewayToTopicApiRole
+    - archExampleApiGatewayToTopicTopic
+    - archExampleApiGatewayToTopicApiRole
   Sns:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId:
-        Ref: TopicGatewayRestApi
+        Ref: archExampleApiGatewayToTopicApi
       ParentId:
         Fn::GetAtt:
-        - TopicGatewayRestApi
+        - archExampleApiGatewayToTopicApi
         - RootResourceId
       PathPart: sns
   POST:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId:
-        Ref: TopicGatewayRestApi
+        Ref: archExampleApiGatewayToTopicApi
       ResourceId:
         Ref: Sns
       AuthorizationType: NONE
@@ -31,7 +39,7 @@ Resources:
             Fn::Join:
             - ''
             - - "'"
-              - Ref: TopicGatewayTopic
+              - Ref: archExampleApiGatewayToTopicTopic
               - "'"
         Uri:
           Fn::Join:
@@ -43,9 +51,9 @@ Resources:
         IntegrationHttpMethod: POST
         Credentials:
           Fn::GetAtt:
-          - TestEventApiRole
+          - archExampleApiGatewayToTopicApiRole
           - Arn
-  TestEventApiRole:
+  archExampleApiGatewayToTopicApiRole:
     Type: AWS::IAM::Role
     Properties:
       Path: "/"
@@ -66,18 +74,10 @@ Resources:
             Resource:
             - "*"
             Effect: Allow
-  TopicGatewayRestApi:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Name: TopicGatewayRestApi
-    DependsOn:
-    - TestEventApiRole
-    - TopicGatewayTopic
-    - TestEventApiRole
-  TopicGatewayTopic:
+  archExampleApiGatewayToTopicTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: TopicGatewayTopic
+      TopicName: archExampleApiGatewayToTopicTopic
       Subscription: []
 Description: ''
 Parameters: {}
