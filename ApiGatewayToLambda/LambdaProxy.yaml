@@ -1,0 +1,206 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  archExampleLambdaProxyRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: archExampleLambdaProxyRestApi
+  Event:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId:
+        Ref: archExampleLambdaProxyRestApi
+      ParentId:
+        Fn::GetAtt:
+        - archExampleLambdaProxyRestApi
+        - RootResourceId
+      PathPart: event
+  PostOrderEvent:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId:
+        Ref: archExampleLambdaProxyRestApi
+      ResourceId:
+        Ref: Event
+      AuthorizationType: NONE
+      HttpMethod: POST
+      RequestParameters:
+        method.request.path.tsId: true
+      Integration:
+        Uri:
+          Fn::Join:
+          - ''
+          - - 'arn:aws:apigateway:'
+            - Ref: AWS::Region
+            - ":lambda:path/2015-03-31/functions/"
+            - Fn::GetAtt:
+              - archExampleLambdaProxyRestApiToTopicLambda
+              - Arn
+            - "/invocations"
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+  archExampleLambdaProxyRestApiLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName:
+        Fn::GetAtt:
+        - archExampleLambdaProxyRestApiToTopicLambda
+        - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:execute-api:'
+          - Ref: AWS::Region
+          - ":"
+          - Ref: AWS::AccountId
+          - ":"
+          - Ref: archExampleLambdaProxyRestApi
+          - "/*"
+  archExampleLambdaProxyRestApiToTopicLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: !Sub |
+          var AWS = require('aws-sdk');
+
+          getCestTime = function() {
+            var now = new Date();
+            now.setHours(now.getHours() + 2); // from timezone GMT to CEST
+            return now;
+          };
+
+          toMessage = function(event) {
+             var msgBody = JSON.parse(event.body);
+             var creationDate = getCestTime();
+             return {
+               "params": {
+                 "creationDate": creationDate
+               },
+               "message": msgBody
+             };
+          };
+
+          toResponse = function(statusCode, body) {
+            return {
+              "isBase64Encoded": false,
+              "statusCode": statusCode,
+              "headers": { },
+              "body": JSON.stringify(body)
+            };
+          };
+
+          exports.handler = function(event, context, callback) {
+             var message = toMessage(event);
+             var sns = new AWS.SNS();
+             var params = {
+               Message: JSON.stringify(message, null, 2),
+               Subject: message.params.tsId,
+               TopicArn: process.env.topicArn
+             };
+             sns.publish(params, function(err, data) {
+                 if(err) {
+                   callback(null, toResponse(500, err));
+                 } else {
+                   callback(null, toResponse(200, { "MessageId": data.MessageId }));
+                 }
+             });
+          };
+      Description: transform apigateway messages to a topic
+      FunctionName: archExampleLambdaProxyRestApiToTopicLambda
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+        - tbMemberServiceLambdaExecutionRole
+        - Arn
+      Runtime: nodejs4.3
+      Environment:
+        Variables:
+          topicArn: !Ref archExampleLambdaProxyTopic
+  tbMemberServiceLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - arn:aws:iam::aws:policy/AmazonSNSFullAccess
+  archExampleLambdaProxyRestApiStandardStage:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: PostOrderEvent
+    Properties:
+      Description: standard
+      RestApiId:
+        Ref: archExampleLambdaProxyRestApi
+      StageName: standard
+  archExampleLambdaProxyTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: archExampleLambdaProxyTopic
+      Subscription:
+      - Endpoint:
+          Fn::GetAtt:
+          - archExampleLambdaProxyRoutingQueue
+          - Arn
+        Protocol: sqs
+  archExampleLambdaProxyRoutingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: archExampleLambdaProxyRoutingQueue
+  tbMemberServiceApiRule:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Principal:
+            Service: apigateway.amazonaws.com
+          Effect: Allow
+          Sid: ''
+      Policies:
+      - PolicyName: archExampleLambdaProxyRoutingQueuePolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sqs:*
+            Resource:
+            - "*"
+            Effect: Allow
+      - PolicyName: archExampleLambdaProxyTopicPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sns:*
+            Resource:
+            - "*"
+            Effect: Allow
+  archExampleLambdaProxyTopic2QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+      - Ref: archExampleLambdaProxyRoutingQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: sqspolicy
+        Statement:
+        - Sid: ''
+          Effect: Allow
+          Principal: "*"
+          Action: SQS:SendMessage
+          Resource: "*"
+          Condition:
+            ArnEquals:
+              aws:SourceArn:
+                Ref: archExampleLambdaProxyTopic
+    DependsOn:
+    - archExampleLambdaProxyRoutingQueue
