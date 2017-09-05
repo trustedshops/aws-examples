@@ -65,15 +65,9 @@ Resources:
         ZipFile: !Sub |
           var AWS = require('aws-sdk');
 
-          getCestTime = function() {
-            var now = new Date();
-            now.setHours(now.getHours() + 2); // from timezone GMT to CEST
-            return now;
-          };
-
           toMessage = function(event) {
              var msgBody = JSON.parse(event.body);
-             var creationDate = getCestTime();
+             var creationDate = new Date();
              return {
                "params": {
                  "creationDate": creationDate
