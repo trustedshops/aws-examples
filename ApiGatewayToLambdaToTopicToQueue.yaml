@@ -90,7 +90,7 @@ Resources:
              var sns = new AWS.SNS();
              var params = {
                Message: JSON.stringify(message, null, 2),
-               Subject: message.params.tsId,
+               Subject: new Date().toString(),
                TopicArn: process.env.topicArn
              };
              sns.publish(params, function(err, data) {
