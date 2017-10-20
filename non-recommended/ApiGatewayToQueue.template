@@ -1,4 +1,7 @@
 ---
+#
+# ATTENTION: Do not use this pattern because Ampersands can not be transported between api gateway and queue
+#
 AWSTemplateFormatVersion: '2010-09-09'
 Resources:
   archExampleApiGatewayToQueueRestApi:
