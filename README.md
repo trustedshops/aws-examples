@@ -14,4 +14,4 @@ Motivation:
 * higher availability
 * buffer peak load
 
-![ApiGatewayToLambdaToTopicToQueue](http://uml.mvnsearch.org/github/trustedshops/aws-examples/blob/master/doc/uml/ApiGatewayToLambdaToTopicToQueue_gist.puml)
+![ApiGatewayToLambdaToTopicToQueue](http://uml.mvnsearch.org/github/trustedshops/aws-examples/blob/master/doc/uml/apigateway_queue_gist.puml)
