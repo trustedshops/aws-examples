@@ -9,9 +9,9 @@ ApiGateway to Lambda to Topic to Queue
 
 Incoming traffic can be stored asynchroniosly in the cloud. The target service can poll the request from the queue.
 
-Motivation: 
+Motivation:
 
 * higher availability
 * buffer peak load
 
-![ApiGatewayToLambdaToTopicToQueue](http://uml.mvnsearch.org/github/trustedshops/aws-examples/blob/master/doc/uml/apigateway_queue_gist.puml)
+![ApiGatewayToLambdaToTopicToQueue](doc/uml/ApiGatewayToLambdaToTopicToQueue.png)
