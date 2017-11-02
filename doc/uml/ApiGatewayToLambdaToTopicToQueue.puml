@@ -14,11 +14,14 @@ cloud AWS {
   queue Queue
 }
 
+node Service
 
-user --> [API-Gateway]
+
+user --> [API-Gateway]: incoming traffic
 [API-Gateway] --> [Lambda]
 [Lambda] --> [Topic]
 [Topic] --> Queue
+Queue <-- Service: polling
 
 @enduml
 
