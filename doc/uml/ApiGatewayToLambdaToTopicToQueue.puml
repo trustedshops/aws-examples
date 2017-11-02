@@ -1,0 +1,24 @@
+
+@startuml
+
+left to right direction
+
+'skinparam handwritten true
+
+actor user
+
+cloud AWS {
+  [API-Gateway]
+  [Lambda]
+  [Topic]
+  queue Queue
+}
+
+
+user --> [API-Gateway]
+[API-Gateway] --> [Lambda]
+[Lambda] --> [Topic]
+[Topic] --> Queue
+
+@enduml
+
