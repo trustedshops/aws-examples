@@ -1,4 +1,3 @@
-
 @startuml
 
 left to right direction
@@ -24,4 +23,3 @@ user --> [API-Gateway]: incoming traffic
 Queue <-- Service: polling
 
 @enduml
-
