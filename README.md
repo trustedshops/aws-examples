@@ -15,3 +15,17 @@ Motivation:
 * buffer peak load
 
 ![ApiGatewayToLambdaToTopicToQueue](doc/uml/ApiGatewayToLambdaToTopicToQueue.png)
+
+ApiGateway to Lambda
+--------------------
+
+This example schows how to connect a simple lambda to an api gateway.
+
+![ApiGatewayToLambda](doc/uml/ApiGatewayToLambda.png)
+
+Lambda to S3
+------------
+
+In this example a lambda simply writes a string into a s3 bucket file.
+
+![LambdaToS3](doc/uml/LambdaToS3.png)
