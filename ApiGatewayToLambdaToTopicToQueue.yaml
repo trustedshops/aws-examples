@@ -97,7 +97,7 @@ Resources:
                  if(err) {
                    callback(null, toResponse(500, err));
                  } else {
-                   callback(null, toResponse(200, { "MessageId": data.MessageId }));
+                   callback(null, toResponse(202, { "MessageId": data.MessageId }));
                  }
              });
           };
